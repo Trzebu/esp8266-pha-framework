@@ -1,0 +1,1 @@
+This is my attempt to implement little framework that can be integrated with my PHA engine. At this moment it's using websocket to manager relays connected to esp8266. It can be used without PHA too with access to API.
