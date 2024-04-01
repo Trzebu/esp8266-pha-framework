@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>PHA-ESP manage relays</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://kit.fontawesome.com/9045708893.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="topnav">
+        <h1>PHA-ESP manage relays</h1>
+    </div>
+    <div class="content">
+        <div class="card">
+            <div class="card-title">
+                Added relays:
+            </div>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>GPIO</th>
+                    <th>State</th>
+                    <th>On</th>
+                    <th>Off</th>
+                    <th>Delete</th>
+                </tr>
+                <tbody id="relays"></tbody>
+            </table>
+        </div>
+        <div class="card">
+            <div class="card-title">
+                Add new relay:
+            </div>
+            <form id="relay_form">
+                <div class="input-group">
+                    <label for="name">Relay name:</label>
+                    <input type="text" name="name" id="name" />
+                </div>
+                <div class="input-group">
+                    <label for="gpio">GPIO:</label>
+                    <select name="gpio" id="gpio"></select>
+                </div>
+            </form>
+            <p id="error" class="error"></p>
+            <button id="add_btn" class="button-on">Add</button>
+        </div>
+    </div>
+</body>
+
+<script>
+const addBtn = document.getElementById("add_btn");
+const form = document.getElementById("relay_form");
+const error = document.getElementById("error");
+
+addBtn.addEventListener("click", () => {
+    const data = new URLSearchParams();
+
+    for (const pair of new FormData(form)) {
+        data.append(pair[0], pair[1]);
+    }
+    
+    fetch("/relay/new", {
+        method: "POST",
+        body: data
+    }).then(res => {
+        if (res.status === 204) {
+            loadRelays();
+            loadGpio(); 
+        } else
+            return res.json();
+    }).then(json => {
+        if (json)
+            error.innerText = json.error;
+    });
+});
+
+const loadRelays = () => {
+    const table = document.getElementById("relays");
+
+    table.innerHTML = "";
+    error.innerText = "";
+
+    fetch("/get_relays", {
+        method: "GET"
+    }).then(res => res.json()).then(data => {
+        data.forEach(relay => {
+            table.innerHTML += `
+                <tr>
+                    <td>${relay.name}</td>
+                    <td>${relay.gpio}</td>
+                    <td>${relay.state}</td>
+                    <td><a href="/set_relay_state?name=${relay.name}&state=on">On</a></td>
+                    <td><a href="/set_relay_state?name=${relay.name}&state=off">Off</a></td>
+                    <td><a href="/relay_delete?name=${relay.name}"><i class="fa-solid fa-trash"></a></i></td>
+                </tr>
+            `;
+        })
+    })
+
+}
+
+const loadGpio = () => {
+    const gpioList = document.getElementById("gpio");
+    gpioList.innerHTML = "";
+
+    fetch("/get_unused_gpio_pins", {
+        method: "GET"
+    }).then(res => res.json()).then(data => {
+        data.forEach(gpio => {
+            gpioList.innerHTML += `
+                <option value="${gpio}">
+                    ${gpio}
+                </option>
+            `;
+        })
+    })
+}
+
+loadRelays();
+loadGpio();
+
+</script>
+
+</html>
