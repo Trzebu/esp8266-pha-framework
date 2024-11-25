@@ -30,6 +30,7 @@ void routes () {
 
         String name = "";
         int gpio = -1;
+        bool inverted = false;
 
         for (int i = 0; i < params; i++) {
             AsyncWebParameter* param = request->getParam(i);
@@ -39,6 +40,8 @@ void routes () {
                 name = param->value().c_str();
             else if (param->name() == "gpio")
                 gpio = param->value().toInt();
+            else if (param->name() == "inverted")
+                inverted = param->value().toInt() == 1 ? true : false;
         }
         
         if (name == "" || gpio == -1) {
@@ -67,14 +70,14 @@ void routes () {
             return;
         }
         
-        relayManager.add(name, gpio);
+        relayManager.add(name, gpio, inverted);
         request->send(204, "text/html", "No content");
     });
     server.on("/get_relays", HTTP_GET, [](AsyncWebServerRequest *request) {
         String json = "[";
 
         for (auto relay = relayManager.relays.begin(); relay != relayManager.relays.end(); ++relay) {
-            String data = "{\"name\":\"" + relay->name + "\",\"gpio\":" + relay->gpio->pin + ",\"state\":\"" + relay->getState() + "\"}";
+            String data = "{\"name\":\"" + relay->name + "\",\"gpio\":" + relay->gpio->pin + ",\"inverted\":" + (relay->invertState ? "1" : "0") + ",\"state\":\"" + relay->getState() + "\"}";
 
             if (std::next(relay) != relayManager.relays.end())
                 data = data + ",";

@@ -6,7 +6,7 @@ class RelayManager {
     public:
         RelayManager(Pin& pin);
         void init();
-        void add(String name, int gpio);
+        void add(String name, int gpio, bool invertedState);
         void remove(String name);
         bool exists(String name);
         bool exists(int gpio);

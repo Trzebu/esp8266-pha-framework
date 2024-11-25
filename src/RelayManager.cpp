@@ -10,9 +10,9 @@ void RelayManager::init () {
     this->load();
 }
 
-void RelayManager::add (String name, int gpio) {
+void RelayManager::add (String name, int gpio, bool invertedState) {
     this->relays.push_back(
-        Relay(name, this->pin->get(gpio))
+        Relay(name, this->pin->get(gpio), invertedState)
     );
     this->save();
 }
@@ -63,7 +63,8 @@ void RelayManager::save () {
     String data = "";
 
     for (auto relay = this->relays.begin(); relay != this->relays.end(); ++relay) {
-        data = data + relay->name + "," + relay->gpio->pin;
+        String invertState = relay->invertState ? "1" : "0";
+        data = data + relay->name + "," + relay->gpio->pin + "," + invertState;
 
         if (std::next(relay) != this->relays.end())
             data = data + "/";
@@ -76,8 +77,9 @@ void RelayManager::load () {
     std::vector<std::vector<std::string>> relays = getObjectsArray(this->DATA_FILE_NAME);
 
     for (auto relay : relays) {
+        bool invertState = relay[2] == "1" ? true : false;
         this->relays.push_back(
-            Relay(relay[0].c_str(), this->pin->get(std::stoi(relay[1])))
+            Relay(relay[0].c_str(), this->pin->get(std::stoi(relay[1])), invertState)
         );
     }
 }

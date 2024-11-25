@@ -22,6 +22,7 @@
                 <tr>
                     <th>Name</th>
                     <th>GPIO</th>
+                    <th>Inverted</th>
                     <th>State</th>
                     <th>On</th>
                     <th>Off</th>
@@ -42,6 +43,13 @@
                 <div class="input-group">
                     <label for="gpio">GPIO:</label>
                     <select name="gpio" id="gpio"></select>
+                </div>
+                <div class="input-group">
+                    <label for="inverted">Invert state:</label>
+                    <select name="inverted" id="inverted">
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
                 </div>
             </form>
             <p id="error" class="error"></p>
@@ -91,6 +99,7 @@ const loadRelays = () => {
                 <tr>
                     <td>${relay.name}</td>
                     <td>${relay.gpio}</td>
+                    <td>${relay.inverted === 1 ? 'Yes' : 'No'}</td>
                     <td>${relay.state}</td>
                     <td><a href="/set_relay_state?name=${relay.name}&state=on">On</a></td>
                     <td><a href="/set_relay_state?name=${relay.name}&state=off">Off</a></td>
